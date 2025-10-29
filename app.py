@@ -58,6 +58,16 @@ input_data = pd.DataFrame({
 # 🔹 Encoding manual sesuai dataset
 # ===============================
 label_maps = {
+    'Department': ['Business Administration', 
+                   "Computer Science and Engineering",
+                    "Economics",
+                    "Electrical and Electronic Engineering",
+                    "English",
+                    "Journalism, Communication and Media Studies",
+                    "Law and Human Rights",
+                    "Political Science",
+                    "Public Health",
+                    "Sociology"],
     'Gender': ['Male', 'Female'],
     'Income': ['Low (Below 15,000)', 'Lower middle (15,000-30,000)', 'Upper middle (30,000-50,000)', 'High (Above 50,000)'],
     'Hometown': ['City', 'Village'],
@@ -68,7 +78,7 @@ label_maps = {
     'Extra': ['Yes', 'No'],
     'Semester': ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th']
 }
-categorical_cols = ['Department', 'Gender', 'Income', 'Hometown', 'Attendance']
+
 for col, categories in label_maps.items():
     input_data[col] = input_data[col].apply(lambda x: categories.index(x))
 
@@ -81,3 +91,4 @@ prediction = model.predict(input_scaled)[0]
 st.subheader("📈 Hasil Prediksi IPK:")
 st.success(f"Prediksi nilai akhir mahasiswa: {prediction:.3f}")
  
+
