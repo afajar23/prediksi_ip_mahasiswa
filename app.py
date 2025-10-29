@@ -12,7 +12,16 @@ st.write("Aplikasi ini memprediksi potensi nilai akhir (IPK) berdasarkan profil 
 # ===============================
 # 🔹 Input fitur dari user
 # ===============================
-department = st.selectbox("Jurusan", ["Business Administration"])
+department = st.selectbox("Jurusan", ["Business Administration", 
+                                      "Computer Science and Engineering", 
+                                      "Economics", 
+                                      "Electrical and Electronic Engineering", 
+                                      "English",
+                                      "Journalism, Communication and Media Studies",
+                                      "Law and Human Rights",
+                                      "Political Science",
+                                      "Public Health",
+                                      "Sociology"])
 gender = st.selectbox("Jenis Kelamin", ["Male", "Female"])
 hsc = st.number_input("Nilai HSC", 0.0, 5.0, 3.0)
 ssc = st.number_input("Nilai SSC", 0.0, 5.0, 3.0)
@@ -80,3 +89,4 @@ prediction = model.predict(input_scaled)[0]
 
 st.subheader("📈 Hasil Prediksi IPK:")
 st.success(f"Prediksi nilai akhir mahasiswa: {prediction:.3f}")
+
