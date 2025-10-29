@@ -2,40 +2,41 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load model dan scaler
+# ===============================
+# 隼 Muat SEMUA artefak
+# ===============================
 model = joblib.load('model_random_forest.pkl')
 scaler = joblib.load('scaler.pkl')
+# <-- PERUBAHAN: Muat juga file encoder Anda
+encoders = joblib.load('label_encoders.pkl') 
 
-st.title("🎓 Prediksi Prestasi Akademik Mahasiswa")
+st.title("雌 Prediksi Prestasi Akademik Mahasiswa")
 st.write("Aplikasi ini memprediksi potensi nilai akhir (IPK) berdasarkan profil mahasiswa.")
 
 # ===============================
-# 🔹 Input fitur dari user
+# 隼 Input fitur dari user
 # ===============================
-department = st.selectbox("Jurusan", ["Business Administration"])
-gender = st.selectbox("Jenis Kelamin", ["Male", "Female"])
+# <-- PERUBAHAN: Opsi diambil dari 'encoders' untuk menjamin konsistensi
+department = st.selectbox("Jurusan", encoders['Department'].classes_)
+gender = st.selectbox("Jenis Kelamin", encoders['Gender'].classes_)
 hsc = st.number_input("Nilai HSC", 0.0, 5.0, 3.0)
 ssc = st.number_input("Nilai SSC", 0.0, 5.0, 3.0)
-income = st.selectbox("Pendapatan Keluarga", [
-    "Low (Below 15,000)", 
-    "Lower middle (15,000-30,000)", 
-    "Upper middle (30,000-50,000)", 
-    "High (Above 50,000)"
-])
-hometown = st.selectbox("Asal Daerah", ["City", "Village"])
+income = st.selectbox("Pendapatan Keluarga", encoders['Income'].classes_)
+hometown = st.selectbox("Asal Daerah", encoders['Hometown'].classes_)
 computer = st.slider("Kemampuan Komputer (1-5)", 1, 5, 3)
-preparation = st.selectbox("Waktu Belajar", ["0-1 Hour", "2-3 Hours", "More than 3 Hours"])
-gaming = st.selectbox("Waktu Bermain Game", ["0-1 Hour", "2-3 Hours", "More than 3 Hours"])
-attendance = st.selectbox("Kehadiran", ["Below 60%", "60%-80%", "80%-100%"])
-job = st.selectbox("Apakah Bekerja?", ["Yes", "No"])
+preparation = st.selectbox("Waktu Belajar", encoders['Preparation'].classes_)
+gaming = st.selectbox("Waktu Bermain Game", encoders['Gaming'].classes_)
+attendance = st.selectbox("Kehadiran", encoders['Attendance'].classes_)
+job = st.selectbox("Apakah Bekerja?", encoders['Job'].classes_)
 english = st.slider("Kemampuan Bahasa Inggris (1-5)", 1, 5, 3)
-extra = st.selectbox("Ikut Kegiatan Ekstrakurikuler?", ["Yes", "No"])
-semester = st.selectbox("Semester Saat Ini", ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"])
+extra = st.selectbox("Ikut Kegiatan Ekstrakurikuler?", encoders['Extra'].classes_)
+semester = st.selectbox("Semester Saat Ini", encoders['Semester'].classes_)
 last = st.number_input("Nilai Semester Terakhir", 0.0, 4.0, 3.0)
 
 # ===============================
-# 🔹 Buat dataframe input
+# 隼 Buat dataframe input
 # ===============================
+# Tidak ada perubahan di bagian ini
 input_data = pd.DataFrame({
     'Department': [department],
     'Gender': [gender],
@@ -55,40 +56,34 @@ input_data = pd.DataFrame({
 })
 
 # ===============================
-# 🔹 Encoding manual sesuai dataset
+# 隼 BAGIAN BARU: Encoding Otomatis
 # ===============================
-label_maps = {
-    'Department': ['Business Administration', 
-                   "Computer Science and Engineering",
-                    "Economics",
-                    "Electrical and Electronic Engineering",
-                    "English",
-                    "Journalism, Communication and Media Studies",
-                    "Law and Human Rights",
-                    "Political Science",
-                    "Public Health",
-                    "Sociology"],
-    'Gender': ['Male', 'Female'],
-    'Income': ['Low (Below 15,000)', 'Lower middle (15,000-30,000)', 'Upper middle (30,000-50,000)', 'High (Above 50,000)'],
-    'Hometown': ['City', 'Village'],
-    'Preparation': ['0-1 Hour', '2-3 Hours', 'More than 3 Hours'],
-    'Gaming': ['0-1 Hour', '2-3 Hours', 'More than 3 Hours'],
-    'Attendance': ['Below 60%', '60%-80%', '80%-100%'],
-    'Job': ['Yes', 'No'],
-    'Extra': ['Yes', 'No'],
-    'Semester': ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th']
-}
+# <-- PERUBAHAN: Hapus 'label_maps' dan ganti dengan loop ini
+# Tentukan kolom mana yang kategorikal (sesuai encoders)
+categorical_cols = [
+    'Department', 'Gender', 'Income', 'Hometown', 'Preparation', 
+    'Gaming', 'Attendance', 'Job', 'Extra', 'Semester'
+]
 
-for col, categories in label_maps.items():
-    input_data[col] = input_data[col].apply(lambda x: categories.index(x))
+# Buat salinan untuk menghindari Peringatan (Warning)
+input_data_encoded = input_data.copy()
+
+# Loop dan transform setiap kolom kategorikal
+for col in categorical_cols:
+    # Ambil nilai string dari input (contoh: "Economics")
+    string_value = input_data_encoded[col].iloc[0]
+    
+    # Ubah string itu menjadi angka (contoh: 2) menggunakan encoder yang sesuai
+    # .transform() mengharapkan array, jadi kita bungkus [string_value]
+    # lalu ambil hasilnya [0]
+    input_data_encoded[col] = encoders[col].transform([string_value])[0]
 
 # ===============================
-# 🔹 Standarisasi & Prediksi
+# 隼 Standarisasi & Prediksi
 # ===============================
-input_scaled = scaler.transform(input_data)
+# <-- PERUBAHAN: Gunakan dataframe yang sudah di-encode
+input_scaled = scaler.transform(input_data_encoded)
 prediction = model.predict(input_scaled)[0]
 
-st.subheader("📈 Hasil Prediksi IPK:")
+st.subheader("嶋 Hasil Prediksi IPK:")
 st.success(f"Prediksi nilai akhir mahasiswa: {prediction:.3f}")
- 
-
