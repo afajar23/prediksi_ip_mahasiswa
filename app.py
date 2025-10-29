@@ -38,22 +38,16 @@ input_data = pd.DataFrame({
 # =============================
 
 # Definisikan mapping kategori sesuai dataset asli
-# label_maps = {
-#     'Gender': ['Male', 'Female'],
-#     'Income': ['Low (Below 15,000)', 'Lower middle (15,000-30,000)', 'Upper middle (30,000-50,000)', 'High (Above 50,000)'],
-#     'Hometown': ['City', 'Village'],
-#     'Attendance': ['Below 60%', '60%-80%', '80%-100%']
-# }
+label_maps = {
+    'Gender': ['Male', 'Female'],
+    'Income': ['Low (Below 15,000)', 'Lower middle (15,000-30,000)', 'Upper middle (30,000-50,000)', 'High (Above 50,000)'],
+    'Hometown': ['City', 'Village'],
+    'Attendance': ['Below 60%', '60%-80%', '80%-100%']
+}
 
-# # Encode input berdasarkan urutan di atas
-# for col, categories in label_maps.items():
-#     input_data[col] = input_data[col].apply(lambda x: categories.index(x))
-
-label_encoders = joblib.load('label_encoders.pkl')
-
-for col in ['Gender', 'Income', 'Hometown', 'Attendance']:
-    le = label_encoders[col]
-    input_data[col] = le.transform(input_data[col])
+# Encode input berdasarkan urutan di atas
+for col, categories in label_maps.items():
+    input_data[col] = input_data[col].apply(lambda x: categories.index(x))
 
 # =============================
 # 🔹 Standarisasi & Prediksi
@@ -64,3 +58,4 @@ prediction = model.predict(input_scaled)[0]
 
 st.subheader("📈 Hasil Prediksi IPK:")
 st.success(f"Prediksi nilai akhir mahasiswa: {prediction:.3f}")
+
